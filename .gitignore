@@ -1,0 +1,14 @@
+*
+!*.c
+!*.cpp
+!*.cxx
+!*.h
+!*.hpp
+!*.hxx
+!*.cc
+!*.c++
+!*.hh
+!*.h++
+!.gitignore
+!LICENSE
+!README.md
