@@ -12,7 +12,16 @@
 #include <functional>
 
 // Require C++ 17
+#if __cplusplus >= 201703L
 #include <string_view>
+#else
+#include <experimental/string_view>
+// #define string_view experimental::string_view
+namespace std
+{
+    using string_view = experimental::string_view;
+};
+#endif
 
 /** 
  * @brief  Rabin-Karp Algorithm - string-searching algorithm using hashing
