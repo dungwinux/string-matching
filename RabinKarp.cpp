@@ -8,43 +8,71 @@
 #include <iostream>
 #include <string>
 
-// Require C++ 11
-#include <functional>
-
-// Require C++ 17
-#include <string_view>
-
 /** 
  * @brief  Rabin-Karp Algorithm - string-searching algorithm using hashing
  * @note   This implementation will count number of pattern string in target string
  * @param  target: given string that may contain pattern string
  * @param  pattern: string need to be find in target string
- * @retval Number of subsring match pattern string in target string
+ * @retval Position of match pattern string in target string
  */
 
-std::size_t RabinKarp(
-    std::string target,
-    std::string pattern)
+int RabinKarp(const std::string &target, const std::string &pattern)
 {
-    // string -> string_view : Read without copying
-    std::string_view targetStr = target;
+    const unsigned cnst = 257, mod = 1e9 + 7;
 
-    // Define hash function
-    std::hash<std::string_view> hash_fn;
+    auto hash = [](const std::string &str) -> unsigned {
+        long long sum = 0;
+        for (auto &iter : str)
+        {
+            sum = sum * cnst + iter;
+            sum %= mod;
+        }
+        return sum;
+    };
 
-    std::size_t count = 0,
-                hashPattern = hash_fn(pattern),
-                loop_size = target.length() - pattern.length() + 1;
+    auto bin_pow = [](long long a, long long b) -> long long {
+        long long res = 1;
+        while (b != 0)
+        {
+            if (b & 1)
+            {
+                res *= a;
+                res %= mod;
+            }
+            a *= a;
+            a %= mod;
+            b >>= 1;
+        }
+        return res;
+    };
 
-    // Loop through string
-    for (std::size_t iter = 0; iter < loop_size; ++iter)
-        // Compare hash of 2 substrings
-        if (hash_fn(target.substr(iter, pattern.length())) == hashPattern)
-            // Compare 2 strings
-            if (target.substr(iter, pattern.length()) == pattern)
-                ++count;
+    long long
+        patternSize = pattern.size(),
+        targetSize = target.size(),
+        power = bin_pow(cnst, patternSize),
+        patternHash = hash(pattern),
+        rollingHash = 0;
 
-    return count;
+    for (long long i = 0; i < targetSize; ++i)
+    {
+        // Add last character
+        rollingHash = rollingHash * cnst + target[i];
+        rollingHash %= mod;
+        if (i >= patternSize)
+        {
+            // Sub first character
+            rollingHash -= power * target[i - patternSize];
+            // Case: Negative
+            while (rollingHash < 0)
+                rollingHash += mod;
+        }
+
+        // Compare hash
+        if (i >= patternSize - 1 && patternHash == rollingHash)
+            return (i - patternSize + 1);
+    }
+
+    return -1;
 }
 
 int main()
